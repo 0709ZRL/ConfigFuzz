@@ -1,0 +1,9 @@
+.vscode/
+config_codeblock.json
+file_codeblock.json
+cb_config/
+cb_config_target/
+rep/
+test-llvm/
+kbuildparser/kbuildparse/__pycache__
+kbuildparser/kbuildparse/*.pyc

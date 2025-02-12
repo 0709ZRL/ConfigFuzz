@@ -20,7 +20,7 @@ function cpppc {
     file=$1
 
     # 以一定时间限制执行命令
-    if timeout 30s undertaker -j cpppc "$file"; then
+    if timeout 30s undertaker -j cpppc_decision "$file"; then
         return 0
     else
         return -1
@@ -43,6 +43,6 @@ if [ "$1" = "blockrange" ]; then
     blockrange $2
 fi
 
-if [ "$1" = "cpppc" ]; then
+if [ "$1" = "cpppc_decision" ]; then
     cpppc $2
 fi
