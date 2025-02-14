@@ -1,12 +1,15 @@
+"""
+# 使用undertaker和kbuildparser构建配置项->代码块的库。  
+"""
 import os, re, json, shutil, sys
 
 file_codeblock = {}
 config_codeblock = {}
 paths = []
 
-# 解析由undertaker解析出来的某一源文件的代码块。
-# 返回一个字典。字典格式：{文件路径：{基本块id: 基本块区间, ...}}
 def parse_codeblock_range(res, src):
+    """解析由undertaker解析出来的某一源文件的代码块。
+    返回一个字典。字典格式：{文件路径：{基本块id: 基本块区间, ...}}"""
     range_dict = {}
     src_dict = {}
     for raw in res:
@@ -27,10 +30,12 @@ def parse_codeblock_range(res, src):
     range_dict[src] = src_dict
     return range_dict
 
-# 解析由undertaker解析出来的某一文件里各个代码块对应的配置项表达式。
-# 各个代码块的id与parse_codeblock_range返回的id对应。
-# 返回一个字典。字典格式：{文件路径：{基本块id: 配置项表达式, ...}}
 def parse_codeblock2configexp(res, src):
+    """
+    解析由undertaker解析出来的某一文件里各个代码块对应的配置项表达式。
+    各个代码块的id与parse_codeblock_range返回的id对应。
+    返回一个字典。字典格式：{文件路径：{基本块id: 配置项表达式, ...}}
+    """
     total_dict = {}
     config_dict = {}
     for raw in res:
@@ -58,8 +63,10 @@ def parse_codeblock2configexp(res, src):
     total_dict[src] = config_dict
     return total_dict
 
-# 将配置项表达式中的代码块id换成对应的配置项表达式，得到一个只有配置项的表达式结果
 def replace_block_id(exp, config_dict):
+    """
+    将配置项表达式中的代码块id换成对应的配置项表达式，得到一个只有配置项的表达式结果
+    """
     matches = re.finditer(r'(?<![\dA-Z_])B\d+(?![\dA-Z_])', exp)
     for match in matches:
         start, end = match.start(), match.end()
@@ -71,11 +78,13 @@ def replace_block_id(exp, config_dict):
             exp = exp.replace(id, config_dict[id])
     return exp
 
-# 从file_config和range_dict中建立从配置项到代码块的反向映射，返回一个字典config_dict。
-# file_config来自于parse_codeblock2config的返回值。
-# range_dict来自于parse_codeblock_range的返回值(即file_codeblock)。
-# 字典格式：{配置项:{路径:[代码区间1, 代码区间2, ...]}}
 def parse_config2codeblock(src, range_dict, file_config):
+    """
+    从file_config和range_dict中建立从配置项到代码块的反向映射，返回一个字典config_dict。  
+    file_config来自于parse_codeblock2config的返回值。  
+    range_dict来自于parse_codeblock_range的返回值(即file_codeblock)。  
+    字典格式：{配置项:{路径:[代码区间1, 代码区间2, ...]}}
+    """
     config_dict = {}
     ranges = range_dict[src]
 
@@ -106,8 +115,10 @@ def parse_config2codeblock(src, range_dict, file_config):
                     config_dict[config][src].append(ranges[blockid])
     return config_dict
 
-# 根据prase_codeblock_range和parse_codeblock2config两个函数执行的结果来处理全局字典
 def parse_codeblock(src, range_dict, config_cb):
+    """
+    根据prase_codeblock_range和parse_codeblock2config两个函数执行的结果来处理全局字典
+    """
     # print('range_dict: ', range_dict)
     # print('config_cb: ', config_cb)
     if range_dict[src] == {} or config_cb[src] == {}:
@@ -121,6 +132,10 @@ def parse_codeblock(src, range_dict, config_cb):
             config_codeblock[config].update(value)
 
 def parse_file_codeblock(src):
+    """
+    建立文件到代码块的映射。  
+    返回格式：{路径：{id:区间，...}}
+    """
     if not os.path.exists(src):
         raise FileNotFoundError("内核源码目录不存在，请检查你的路径是否正确。由于不同配置环境不同，推荐使用绝对路径，而不要使用~, ../等符号。")
     
@@ -142,9 +157,15 @@ def parse_file_codeblock(src):
             print(path + " 解析完成。")
 
 def parse_config_codeblock(src, file_codeblock_src):
+    """
+    建立配置项到代码块的映射。  
+    流程为：首先抽取文件里各个代码块和配置项表达式，然后对表达式进行分析，最后将各个代码块id对应的区间和配置项建立映射。  
+    返回结果：{配置项:{路径:[区间1，区间2，...]}}
+    """
     if not os.path.exists(src):
         raise FileNotFoundError("内核源码目录不存在，请检查你的路径是否正确。由于不同配置环境不同，推荐使用绝对路径，而不要使用~, ../等符号。")
     
+    # 需要读取文件到代码块的映射文件，以构建配置项->代码块id->代码块区间的联系。
     with open(file_codeblock_src, 'r') as f:
         file_codeblock = json.load(f)
     
@@ -154,19 +175,21 @@ def parse_config_codeblock(src, file_codeblock_src):
         for file in files:
             # 源码的路径
             path = os.path.join(root, file)
-            # 源码的后缀名
+            # 源码的后缀名，不是代码文件不处理
             suffix = file.split('.')[-1]
             if suffix != 'c' and suffix != 'h' and suffix != 'S':
                 continue
 
-            # 解析源码里基本块和配置项之间的关系
+            # 解析源码里基本块和配置项表达式之间的关系
             res = os.popen("./undertaker.sh cpppc_decision "+path).read().split('\n')
             if res != None:
                 configexp_dict = parse_codeblock2configexp(res, path)
+            # 将配置项表达式拆成一个个配置项，以此建立代码块到配置项间的映射关系
             if len(configexp_dict[path]) > 0:
                 config_dict = parse_config2codeblock(path, 
                                                      {path: file_codeblock.get(path)},
                                                      configexp_dict)
+                # 更新全局字典
                 config_codeblock_update(config_dict)
                 i += 1
                 # with open("cb_config_target/"+str(i)+".json", "w+") as f:
@@ -204,8 +227,10 @@ def parse_config_codeblock(src, file_codeblock_src):
     #     print(dir + '已处理完成。')
     # del codeblock_config_exp
 
-# 使用kbuildparser(其实就是从undertaker分出去的一个独立功能)获取配置项和整个源码文件之间的关系
 def parse_kbuildparser(src):
+    """
+    使用kbuildparser(其实就是从undertaker分出去的一个独立功能)获取配置项和整个源码文件之间的关系
+    """
     paths = os.walk(src)
     configexp_dict = {}
     for path, dir_lst, file_lst in paths:
@@ -233,6 +258,9 @@ def parse_kbuildparser(src):
                 config_codeblock_update(config_dict)
 
 def config_codeblock_update(config_dict):
+    """
+    更新config_codeblock这个全局大字典
+    """
     for config, data in config_dict.items():
         if not config_codeblock.get(config):
             config_codeblock[config] = data
@@ -245,8 +273,11 @@ def config_codeblock_update(config_dict):
                         if range not in config_codeblock[config][path]:
                             config_codeblock[config][path].append(range)
 
-# 使用归并排序的方式将所有的小文件合成一个大的codeblock_config.json
 def codeblock_config_merge(start, stop, target_dir):
+    """
+    使用归并排序的方式将所有的小文件合成一个大的codeblock_config.json  
+    ## 注：此功能目前已废弃
+    """
     # print(start, ' ', stop)
     data = None
     if start >= stop:
@@ -271,16 +302,26 @@ def codeblock_config_merge(start, stop, target_dir):
     return str(start) + '-' + str(stop) + '.json'
 
 if __name__ == '__main__':
+    # 你是想抽取文件->代码块的关系，还是配置项->代码块的关系呢？
+    # 注意，构建配置项->代码块前要先构建文件->代码块哦！
     option = sys.argv[1]
+    # 待解析的内核源码的路径
     kernel_src = sys.argv[2]
+    # 文件->代码块映射保存地址
     file_codeblock_src = sys.argv[3]
     if option == 'file_codeblock':
+        # 构建文件->代码块
         parse_file_codeblock(kernel_src)
+        # 保存
         with open(file_codeblock_src, "w+") as f:
             json.dump(file_codeblock, f)
     elif option == 'config_codeblock':
+        # 构建配置项->代码块
+        # 再提醒一次，构建配置项->代码块前要先构建文件->代码块哦！
         config_codeblock_src = sys.argv[4]
         parse_config_codeblock(kernel_src, file_codeblock_src)
+        # 用kbuildparser构建配置项->整个文件的关系，一并加入到全局大字典中
         parse_kbuildparser(kernel_src)
+        # 保存
         with open(config_codeblock_src, "w+") as f:
             json.dump(config_codeblock, f)

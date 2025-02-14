@@ -1,6 +1,7 @@
 .vscode/
 config_codeblock.json
 file_codeblock.json
+config_tree.json
 cb_config/
 cb_config_target/
 rep/
