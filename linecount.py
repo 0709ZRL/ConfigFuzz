@@ -1,5 +1,7 @@
 import json, os, re
 
+# 统计x86架构下所有可配置的配置项管辖的代码行有多少
+
 config_codeblock_path = 'config_codeblock.json'
 config_tree_path = 'config_tree.json'
 configdirectory_path = '/home/zzzrrll/linux/arch/x86/configs/x86_64_defconfig'
@@ -9,9 +11,10 @@ config_tree = None
 total = 0
 
 counted_lines = {}
+searched_configs = []
 
 def getLines(file, blockrange):
-    print(blockrange)
+    #print(blockrange)
     if blockrange == [0, 0]:
         res = os.popen("wc -l "+file).read().split()[0]
         res = int(res)
@@ -22,6 +25,12 @@ def getLines(file, blockrange):
 
 def getTotalLines(config):
     res = 0
+
+    if config in searched_configs:
+        # 如果已经被统计过了
+        return 0
+    
+    searched_configs.append(config)
     codeblocks = config_codeblock.get(config)
     if not codeblocks:
         return 0
@@ -68,12 +77,15 @@ target_architecture_configs = []
 for line in open(configdirectory_path, 'r'):
     configs = re.findall(r'CONFIG_[A-Z0-9_]+', line)
     if len(configs) == 1:
+        if re.findall(r'is not set', line):
+            continue
         target_architecture_configs.append(configs[0])
-
-print(target_architecture_configs)
 
 for config in target_architecture_configs:
     total += getTotalLines(config)
+
+print("一共找了{}个配置项。".format(len(searched_configs)))
 print("总共{}行。".format(total))
 
-# x86 8777474
+# x86 6132121
+# 5.4 18640244
