@@ -51,26 +51,3 @@ export PATH=$GOROOT/bin:$PATH
 ```
 cd syzdirect_fuzzer && make
 ```
-4、由于本项目需要syzkaller编译出的syz-trace2syz，然而当前环境可能并不支持该二进制文件的编译，检查syzdirect_fuzzer/bin目录下是否有syz-trace2syz，如果没有则证明未能成功编译，此时可以手动安装其所需的库以实现手动编译安装：
-```
-sudo apt-get install ragel
-
-# 在一个干净的目录下拉取goyacc
-git clone https://github.com/golang/tools
-cd tools/cmd/goyacc
-# 编译
-go build
-# 安装
-sudo cp goyacc /usr/local/bin/
-# 记得将这个目录删掉
-rm -rf tools
-
-# 回到syzkaller的目录手动单独编译syz-trace2syz
-cd syzdirect_fuzzer
-cd tools/syz-trace2syz/parser
-ragel -Z -G2 -o lex.go straceLex.rl
-goyacc -o strace.go -p Strace -v="" strace.y
-cd ../../../
-make trace2syz
-```
-此时在bin目录下就可以成功看到syz-trace2syz了！

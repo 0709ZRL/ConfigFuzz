@@ -1,0 +1,47 @@
+# 工作目录
+WorkdirPrefix: /home/zzzrrll/ConfigFuzz/SyzDirect/source/syzdirect/workdir
+# Bug数据集文件
+Dataset: /home/zzzrrll/ConfigFuzz/SyzDirect/source/syzdirect/Runner/dataset.xlsx
+# 编译内核所用的核数
+CPUNum: 8
+# 每一个bug测试轮数
+FuzzRounds: 10
+# 每一个bug测试时间上线
+FuzzUptime: 24
+# 用于复制的内核源码目录，每一个bug都会在工作目录复制一份并命名为case_x
+LinuxSrcTemplate: /home/zzzrrll/linux
+# 要打的kcov patch存储的目录
+KcovPatchPath: /home/zzzrrll/ConfigFuzz/SyzDirect/source/syzdirect/kcov.diff
+# 使用的llvm目录（其中包含build目录，该目录包含bin目录，存储着clang）
+LLVMRootDir: /home/zzzrrll/ConfigFuzz/SyzDirect/source/llvm-project-new
+# 如未在Dataset所指文件中显式指定，编译内核默认使用的配置项清单
+BigConfigPath: /home/zzzrrll/ConfigFuzz/SyzDirect/source/syzdirect/bigconfig
+# Syzkaller测试时使用的配置
+TemplateConfigPath: /home/zzzrrll/ConfigFuzz/SyzDirect/source/syzdirect/template_config
+# Syzkaller所在目录（其中包含bin目录）
+FuzzerDir: /home/zzzrrll/ConfigFuzz/SyzDirect/source/syzdirect/syzdirect_fuzzer
+# syzdirect_function_model所在目录
+FunctionModelDirRoot: /home/zzzrrll/ConfigFuzz/SyzDirect/source/syzdirect/syzdirect_function_model
+# syzdirect_kernel_analysis所在目录
+TargetPointAnalysisDirRoot: /home/zzzrrll/ConfigFuzz/SyzDirect/source/syzdirect/syzdirect_kernel_analysis
+# 为了使用qemu启动内核进行模糊测试，我们需要一个文件系统镜像，存储在这个路径下
+CleanImageTemplatePath: ../
+# 存储内核签名
+KeyPath: ../
+
+# 补充说明：
+# WorkdirPrefix下会创建以下目录，
+# 这些目录下会创建多个case_x目录，每一个case_x目录都是一个bug的工作目录：
+# 存储内核源码 SrcDirRoot: srcs
+# 存储bitcode BitcodeDirRoot: bcs
+# 存储各个接口描述符 InterfaceDirRoot: interfaces
+# 存储目标点位的分析结果 TargetPointAnalysisResultDirRoot: tpa
+# 存储constout ConstOutWorkingDirRoot: consts
+# 存储fuzzinp FuzzInpWorkingDirRoot: fuzzinps
+# 存储fuzzres FuzzingResultDirRoot: fuzzres
+# 存储instrumented的内核 InstrumentedKernelDirRoot: kwithdist
+
+# WorkdirPrefix下会创建三个临时文件：
+# EmitScriptPath: emit-llvm.sh
+# SyzkallerSignaturePath: syzkaller_signature.txt
+# TRMapPath: target2relate2.json

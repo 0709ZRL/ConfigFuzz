@@ -105,7 +105,7 @@ if __name__ == '__main__':
     # 设置一下环境变量
     # 防止kconfiglib解析时出现未知的bug
     # FIXME::解析时出错就不管，那这个还有用吗？设了能让出错频率降低？
-    os.environ["KERNELVERSION"] = "5.4"
+    os.environ["KERNELVERSION"] = "6.15.0"
     os.environ['srctree'] = src
     os.environ['CC'] = 'gcc'
     os.environ['LD'] = 'ld'

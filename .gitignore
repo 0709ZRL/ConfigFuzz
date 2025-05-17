@@ -1,10 +1,33 @@
+# .vscode类
 .vscode/
-config_codeblock.json
-file_codeblock.json
-config_tree.json
-cb_config/
-cb_config_target/
-rep/
-test-llvm/
+# cmake类
+build/
+# 用于实验的无用代码
+ClangPluginExample/
+Demy/
+test_dir/
+test-clang/
+# 编译器和工具链
+go*.tar.gz
+jsoncpp*.tar.gz
+go/
+tools/
+llvm-project/
+# 编译过程产生的中间文件
 kbuildparser/kbuildparse/__pycache__
 kbuildparser/kbuildparse/*.pyc
+# SyzDirect里的破烂
+SyzDirect/.git/
+SyzDirect/.vscode/
+SyzDirect/dataset/
+SyzDirect/source/llvm-project-new/build/
+SyzDirect/source/syzdirect/Runner/__pycache__/
+SyzDirect/source/syzdirect/Runner/SyscallAnalyze/__pycache__/
+SyzDirect/source/syzdirect/syzdirect_function_model/.vscode/
+SyzDirect/source/syzdirect/syzdirect_function_model/build/
+SyzDirect/source/syzdirect/syzdirect_fuzzer/bin/
+SyzDirect/source/syzdirect/syzdirect_kernel_analysis/build/
+SyzDirect/source/syzdirect/test_clang_plugin/build/
+SyzDirect/source/syzdirect/test_clang_plugin/src/lib/
+SyzDirect/source/syzdirect/workdir/
+SyzDirect/source/syzdirect/workdir/Config.py
